@@ -3,11 +3,11 @@
     <h1>🥽 MAIGO SDK</h1>
 </div>
 
-The [Go][] SDK for [Medsenger API][]: A high performance, open source, SDK for Medsenger AI agents.
+The __Go__ SDK for __Medsenger API__: A high performance, open source, SDK for Medsenger AI agents.
 
 ## 🌂 Prerequisites
 
-- **[Go][]**: any one of the **three latest major** [releases][go-releases].
+- **Go**: any one of the **three latest major** releases.
 
 ## 🛠 Installation
 

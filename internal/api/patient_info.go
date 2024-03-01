@@ -1,5 +1,7 @@
 package api
 
+import "github.com/TikhonP/maigo/internal/json"
+
 type Sex string
 
 const (
@@ -31,22 +33,22 @@ type Scenario struct {
 type ContractInfo struct {
 
 	// Contract information
-	Id             int      `json:"id"`              // Contract unique identifier.
-	ContractNumber string   `json:"contract_number"` // Contract identifier assigned to contract by clinic.
-	Scenario       Scenario `json:"scenario"`        // Scenario assigned to the contract.
-	StartDate      int      `json:"start_timestamp"` // Contract start date. TODO parse it
-	EndDate        int      `json:"end_timestamp"`   // Contract end date. TODO parse it
-	DaysDuration   int      `json:"days"`            // Contract duration in days.
-	IsArchived     bool     `json:"archive"`         // Is contracted archived.
+	Id             int            `json:"id"`              // Contract unique identifier.
+	ContractNumber string         `json:"contract_number"` // Contract identifier assigned to contract by clinic.
+	Scenario       Scenario       `json:"scenario"`        // Scenario assigned to the contract.
+	StartDate      json.Timestamp `json:"start_timestamp"` // Contract start date.
+	EndDate        json.Timestamp `json:"end_timestamp"`   // Contract end date.
+	DaysDuration   int            `json:"days"`            // Contract duration in days.
+	IsArchived     bool           `json:"archive"`         // Is contracted archived.
 
 	// Patient information
-	PatientName           string `json:"name"`            // Patient's name.
-	PatientEmail          string `json:"email"`           // Patient's email.
-	PatientSex            Sex    `json:"sex"`             // Patient's sex.
-	PatientPhone          string `json:"phone"`           // Patient's phone.
-	PatientBirthday       string `json:"birthday"`        // Patient's birthday. TODO parse it
-	PatientTimezoneOffset int    `json:"timezone_offset"` // Patient's timezone offset from GMT.
-	PatientAge            string `json:"age"`             // Patient's age.
+	PatientName           string          `json:"name"`            // Patient's name.
+	PatientEmail          string          `json:"email"`           // Patient's email.
+	PatientSex            Sex             `json:"sex"`             // Patient's sex.
+	PatientPhone          string          `json:"phone"`           // Patient's phone.
+	PatientBirthday       json.StringDate `json:"birthday"`        // Patient's birthday.
+	PatientTimezoneOffset int             `json:"timezone_offset"` // Patient's timezone offset from GMT.
+	PatientAge            string          `json:"age"`             // Patient's age.
 
 	// Doctor information
 	DoctorName           string         `json:"doctor_name"`            // Doctor's name.

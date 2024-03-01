@@ -33,8 +33,23 @@ func MakeRequest[Request any, Response any](url *url.URL, data Request) (*Respon
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("RESPONSE:\n%s", string(respDump))
+	log.Printf("RESPONSE:\n%s", string(respDump))
 
 	decodeJsonErr := json.NewDecoder(httpResponse.Body).Decode(&response)
 	return response, decodeJsonErr
+}
+
+func MakeRequestWithEmptyResponse[Request any](url *url.URL, data Request) error {
+	encodedData, encodeJsonErr := json.Marshal(data)
+	if encodeJsonErr != nil {
+		return encodeJsonErr
+	}
+	httpResponse, httpErr := http.Post(url.String(), "application/json", bytes.NewBuffer(encodedData))
+	if httpErr != nil {
+		return httpErr
+	}
+	if httpResponse.StatusCode != http.StatusOK {
+		return fmt.Errorf("MakeRequest: response status code is not OK: %s", httpResponse.Status)
+	}
+	return nil
 }

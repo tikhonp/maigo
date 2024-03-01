@@ -1,5 +1,10 @@
 package maigo
 
+import (
+	"github.com/TikhonP/maigo/internal/json"
+	"time"
+)
+
 type sendMessageOptions struct {
 	Text            string              `json:"text"`
 	ForwardToDoctor bool                `json:"forward_to_doctor"`
@@ -12,7 +17,7 @@ type sendMessageOptions struct {
 	OnlyDoctor      bool                `json:"only_doctor"`
 	NeedAnswer      bool                `json:"need_answer"`
 	OnlyPatient     bool                `json:"only_patient"`
-	ActionDeadline  int                 `json:"action_deadline,omitempty"` // Timestamp TODO: marshall and unmarshall to Date
+	ActionDeadline  json.Timestamp      `json:"action_deadline,omitempty"`
 	IsUrgent        bool                `json:"is_urgent"`
 	Attachments     []MessageAttachment `json:"attachments,omitempty"`
 }
@@ -101,9 +106,9 @@ func WithSmallAction() SendMessageOption {
 }
 
 // WithActionDeadline returns a SendMessageOption which sets date when message becomes inactive.
-func WithActionDeadline(d int) SendMessageOption {
+func WithActionDeadline(t time.Time) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
-		o.ActionDeadline = d
+		o.ActionDeadline = json.Timestamp{Time: t}
 	})
 }
 
