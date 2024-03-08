@@ -1,4 +1,4 @@
-package api
+package maigo
 
 type MedicalRecord struct {
 	Id int `json:"id"`

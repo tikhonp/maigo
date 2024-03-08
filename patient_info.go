@@ -1,4 +1,4 @@
-package api
+package maigo
 
 import "github.com/TikhonP/maigo/internal/json"
 

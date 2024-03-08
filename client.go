@@ -41,17 +41,17 @@ func (c *Client) UpdateHost(host string) *Client {
 type emptyResponse struct{}
 
 // GetContractInfo fetches information about contract with provided contractId.
-func (c *Client) GetContractInfo(contractId int) (*api.ContractInfo, error) {
+func (c *Client) GetContractInfo(contractId int) (*ContractInfo, error) {
 	request := c.tokenAndContractRequest(contractId)
 	reqUrl := c.urlAppendingPath("/api/agents/patient/info")
-	return net.MakeRequest[api.TokenAndContractRequest, api.ContractInfo](reqUrl, request)
+	return net.MakeRequest[api.TokenAndContractRequest, ContractInfo](reqUrl, request)
 }
 
 // GetClinicsInfo fetches all clinics.
-func (c *Client) GetClinicsInfo() (*api.Clinics, error) {
+func (c *Client) GetClinicsInfo() (*Clinics, error) {
 	request := api.TokenOnlyRequest{ApiKey: c.apiKey}
 	reqUrl := c.urlAppendingPath("/api/agents/clinics")
-	return net.MakeRequest[api.TokenOnlyRequest, api.Clinics](reqUrl, request)
+	return net.MakeRequest[api.TokenOnlyRequest, Clinics](reqUrl, request)
 }
 
 // SendMessage sends message in contract chat.
@@ -85,17 +85,17 @@ func (c *Client) OutDateMessage(contractId int, messageId int) error {
 }
 
 // GetCategories fetches all medical records categories.
-func (c *Client) GetCategories() (*api.Categories, error) {
+func (c *Client) GetCategories() (*Categories, error) {
 	request := api.TokenOnlyRequest{ApiKey: c.apiKey}
 	reqUrl := c.urlAppendingPath("/api/agents/records/categories")
-	return net.MakeRequest[api.TokenOnlyRequest, api.Categories](reqUrl, request)
+	return net.MakeRequest[api.TokenOnlyRequest, Categories](reqUrl, request)
 }
 
 // GetAvailableCategories fetches all available medical records categories.
-func (c *Client) GetAvailableCategories(contractId int) (*api.Categories, error) {
+func (c *Client) GetAvailableCategories(contractId int) (*Categories, error) {
 	request := c.tokenAndContractRequest(contractId)
 	reqUrl := c.urlAppendingPath("/api/agents/records/available_categories")
-	return net.MakeRequest[api.TokenAndContractRequest, api.Categories](reqUrl, request)
+	return net.MakeRequest[api.TokenAndContractRequest, Categories](reqUrl, request)
 }
 
 func (c *Client) GetRecords(contractId int) (*emptyResponse, error) {
@@ -104,7 +104,7 @@ func (c *Client) GetRecords(contractId int) (*emptyResponse, error) {
 	return net.MakeRequest[api.TokenAndContractRequest, emptyResponse](reqUrl, request)
 }
 
-func (c *Client) GetRecord(contractId int, recordId int) (*api.MedicalRecord, error) {
+func (c *Client) GetRecord(contractId int, recordId int) (*MedicalRecord, error) {
 	type Request struct {
 		api.TokenAndContractRequest
 		RecordId int `json:"record_id"`
@@ -114,7 +114,7 @@ func (c *Client) GetRecord(contractId int, recordId int) (*api.MedicalRecord, er
 		RecordId:                recordId,
 	}
 	reqUrl := c.urlAppendingPath("/api/agents/records/get")
-	return net.MakeRequest[Request, api.MedicalRecord](reqUrl, request)
+	return net.MakeRequest[Request, MedicalRecord](reqUrl, request)
 }
 
 func (c *Client) AddHooksForCategories(contractId int) {
@@ -139,4 +139,10 @@ func (c *Client) SendRecordAddition(contractId int, recordId int, note string) e
 	}
 	reqUrl := c.urlAppendingPath("/api/agents/records/addition")
 	return net.MakeRequestWithEmptyResponse(reqUrl, request)
+}
+
+func (c *Client) GetAgentTokenForContractId(contractId int) (*AgentToken, error) {
+	request := c.tokenAndContractRequest(contractId)
+	reqUrl := c.urlAppendingPath("/api/agents/token")
+	return net.MakeRequest[api.TokenAndContractRequest, AgentToken](reqUrl, request)
 }

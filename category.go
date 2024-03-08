@@ -1,4 +1,4 @@
-package api
+package maigo
 
 type Category struct {
 	Id                    int    `json:"id"`          // Category unique identifier.

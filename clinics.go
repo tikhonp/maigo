@@ -1,4 +1,4 @@
-package api
+package maigo
 
 // clinic describes Id and Name information about a clinic.
 type clinic struct {
