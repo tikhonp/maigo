@@ -70,7 +70,10 @@ func (c *Client) SendMessage(contractId int, text string, opts ...SendMessageOpt
 	}
 	reqUrl := c.urlAppendingPath("/api/agents/message")
 	resp, err := net.MakeRequest[Request, Response](reqUrl, request)
-	return resp.Id, err
+	if err != nil {
+		return 0, err
+	}
+	return resp.Id, nil
 }
 
 // OutDateMessage hides the message from a chat.

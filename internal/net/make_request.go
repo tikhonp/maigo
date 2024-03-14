@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 )
 
@@ -29,11 +27,11 @@ func MakeRequest[Request any, Response any](url *url.URL, data Request) (*Respon
 
 	defer httpResponse.Body.Close()
 
-	respDump, err := httputil.DumpResponse(httpResponse, true)
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Printf("RESPONSE:\n%s", string(respDump))
+	//respDump, err := httputil.DumpResponse(httpResponse, true)
+	//if err != nil {
+	//	log.Fatal(err)
+	//}
+	//log.Printf("RESPONSE:\n%s", string(respDump))
 
 	decodeJsonErr := json.NewDecoder(httpResponse.Body).Decode(&response)
 	return response, decodeJsonErr

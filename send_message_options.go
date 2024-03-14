@@ -1,23 +1,29 @@
 package maigo
 
 import (
+	"bufio"
+	"encoding/base64"
 	"github.com/TikhonP/maigo/internal/json"
+	"io"
+	"mime"
+	"os"
+	"path/filepath"
 	"time"
 )
 
 type sendMessageOptions struct {
 	Text            string              `json:"text"`
 	ForwardToDoctor bool                `json:"forward_to_doctor"`
-	ActionLink      string              `json:"action_link,omitempty"`
+	ActionLink      *string             `json:"action_link,omitempty"`
 	SendFrom        UserRole            `json:"send_from,omitempty"`
-	ActionName      string              `json:"action_name,omitempty"`
+	ActionName      *string             `json:"action_name,omitempty"`
 	ActionOneTime   bool                `json:"action_onetime"`
 	ActionBig       bool                `json:"action_big"`
 	ActionType      MessageActionType   `json:"action_type"`
 	OnlyDoctor      bool                `json:"only_doctor"`
 	NeedAnswer      bool                `json:"need_answer"`
 	OnlyPatient     bool                `json:"only_patient"`
-	ActionDeadline  json.Timestamp      `json:"action_deadline,omitempty"`
+	ActionDeadline  *json.Timestamp     `json:"action_deadline,omitempty"`
 	IsUrgent        bool                `json:"is_urgent"`
 	Attachments     []MessageAttachment `json:"attachments,omitempty"`
 }
@@ -57,6 +63,9 @@ const (
 )
 
 type MessageAttachment struct {
+	Name     string `json:"name"`
+	Data     string `json:"base64"`
+	MimeType string `json:"type"`
 }
 
 type SendMessageOption interface {
@@ -83,8 +92,8 @@ func newFuncSendMessageOption(f func(*sendMessageOptions)) *funcSendMessageOptio
 // with name and link title.
 func WithAction(name string, link string, actionType MessageActionType) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
-		o.ActionName = name
-		o.ActionLink = link
+		o.ActionName = &name
+		o.ActionLink = &link
 		o.ActionType = actionType
 	})
 }
@@ -108,7 +117,7 @@ func WithSmallAction() SendMessageOption {
 // WithActionDeadline returns a SendMessageOption which sets date when message becomes inactive.
 func WithActionDeadline(t time.Time) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
-		o.ActionDeadline = json.Timestamp{Time: t}
+		o.ActionDeadline = &json.Timestamp{Time: t}
 	})
 }
 
@@ -154,8 +163,33 @@ func WithPatientSenderRole() SendMessageOption {
 	})
 }
 
-func WithAttachments(a []MessageAttachment) SendMessageOption {
+func WithAttachment(a *MessageAttachment) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
-		o.Attachments = a
+		o.Attachments = append(o.Attachments, *a)
 	})
+}
+
+func NewMessageAttachment(fileName, mimeType string, fileReader io.Reader) (*MessageAttachment, error) {
+	content, err := io.ReadAll(fileReader)
+	if err != nil {
+		return nil, err
+	}
+	encoded := base64.StdEncoding.EncodeToString(content)
+	attachment := MessageAttachment{
+		Name:     fileName,
+		Data:     encoded,
+		MimeType: mimeType,
+	}
+	return &attachment, nil
+}
+
+func NewMessageAttachmentFromFile(path string) (*MessageAttachment, error) {
+	mimeType := mime.TypeByExtension(filepath.Ext(path))
+	_, file := filepath.Split(path)
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	reader := bufio.NewReader(f)
+	return NewMessageAttachment(file, mimeType, reader)
 }
