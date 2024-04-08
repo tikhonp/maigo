@@ -1,9 +1,13 @@
 package maigo
 
 import (
-	"github.com/TikhonP/maigo/internal/api"
-	"github.com/TikhonP/maigo/internal/net"
+	"encoding/json"
 	"net/url"
+	"time"
+
+	"github.com/TikhonP/maigo/internal/api"
+	pjson "github.com/TikhonP/maigo/internal/json"
+	"github.com/TikhonP/maigo/internal/net"
 )
 
 // Client encapsulates a range of functionality related to
@@ -104,6 +108,7 @@ func (c *Client) GetRecords(contractId int) (*emptyResponse, error) {
 	return net.MakeRequest[api.TokenAndContractRequest, emptyResponse](reqUrl, request)
 }
 
+// GetRecord fetches a record by contractId and recordId.
 func (c *Client) GetRecord(contractId int, recordId int) (*MedicalRecord, error) {
 	type Request struct {
 		api.TokenAndContractRequest
@@ -119,10 +124,12 @@ func (c *Client) GetRecord(contractId int, recordId int) (*MedicalRecord, error)
 
 func (c *Client) AddHooksForCategories(contractId int) {
 	// TODO: implement it
+	panic("not implemented")
 }
 
 func (c *Client) RemoveHooksForCategories(contractId int) {
 	// TODO: implement it
+	panic("not implemented")
 }
 
 // SendRecordAddition commit addition to a record.
@@ -141,8 +148,35 @@ func (c *Client) SendRecordAddition(contractId int, recordId int, note string) e
 	return net.MakeRequestWithEmptyResponse(reqUrl, request)
 }
 
+// GetAgentTokenForContractId fetches agent token for contract.
 func (c *Client) GetAgentTokenForContractId(contractId int) (*AgentToken, error) {
 	request := c.tokenAndContractRequest(contractId)
 	reqUrl := c.urlAppendingPath("/api/agents/token")
 	return net.MakeRequest[api.TokenAndContractRequest, AgentToken](reqUrl, request)
+}
+
+// AddRecord adds medical record to Medsenger medical records table for contract. Returns recordIds.
+func (c *Client) AddRecord(contractId int, categoryName, value string, recordTime time.Time, params *json.Marshaler) ([]int, error) {
+	type Request struct {
+		api.TokenAndContractRequest
+		CategoryName string          `json:"category_name"`
+		Value        string          `json:"value"`
+		ReturnId     bool            `json:"return_id"`
+		Time         pjson.Timestamp `json:"time"`
+		Params       *json.Marshaler `json:"params,omitempty"`
+	}
+	request := Request{
+		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+		CategoryName:            categoryName,
+		Value:                   value,
+		ReturnId:                true,
+		Time:                    pjson.Timestamp{Time: recordTime},
+		Params:                  params,
+	}
+	reqUrl := c.urlAppendingPath("/api/agents/records/add")
+	ids, err := net.MakeRequest[Request, []int](reqUrl, request)
+	if err != nil {
+		return nil, err
+	}
+	return *ids, nil
 }

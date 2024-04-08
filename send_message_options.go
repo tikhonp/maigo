@@ -1,8 +1,9 @@
 package maigo
 
 import (
-	"github.com/TikhonP/maigo/internal/json"
 	"time"
+
+	"github.com/TikhonP/maigo/internal/json"
 )
 
 type sendMessageOptions struct {
@@ -154,6 +155,7 @@ func WithPatientSenderRole() SendMessageOption {
 	})
 }
 
+// WithAttachments returns a SendMessageOption which sets attachments to a message.
 func WithAttachments(a []MessageAttachment) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
 		o.Attachments = a
