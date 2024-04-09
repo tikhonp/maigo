@@ -2,6 +2,7 @@ package maigo
 
 import (
 	"encoding/json"
+	"errors"
 	"net/url"
 	"time"
 
@@ -155,8 +156,8 @@ func (c *Client) GetAgentTokenForContractId(contractId int) (*AgentToken, error)
 	return net.MakeRequest[api.TokenAndContractRequest, AgentToken](reqUrl, request)
 }
 
-// AddRecord adds medical record to Medsenger medical records table for contract. Returns recordIds.
-func (c *Client) AddRecord(contractId int, categoryName, value string, recordTime time.Time, params *json.Marshaler) ([]int, error) {
+// AddRecord adds medical record to Medsenger medical records table for contract. Returns recordId.
+func (c *Client) AddRecord(contractId int, categoryName, value string, recordTime time.Time, params *json.Marshaler) (*int, error) {
 	type Request struct {
 		api.TokenAndContractRequest
 		CategoryName string          `json:"category_name"`
@@ -172,6 +173,43 @@ func (c *Client) AddRecord(contractId int, categoryName, value string, recordTim
 		ReturnId:                true,
 		Time:                    pjson.Timestamp{Time: recordTime},
 		Params:                  params,
+	}
+	reqUrl := c.urlAppendingPath("/api/agents/records/add")
+	ids, err := net.MakeRequest[Request, []int](reqUrl, request)
+	if err != nil {
+		return nil, err
+	}
+	if len(*ids) == 0 {
+		return nil, errors.New("empty id response")
+	}
+	return &(*ids)[0], nil
+}
+
+type Record struct {
+	CategoryName string          `json:"category_name"`
+	Value        string          `json:"value"`
+	Time         pjson.Timestamp `json:"time"`
+}
+
+func NewRecord(categoryName, value string, time time.Time) Record {
+	return Record{
+		CategoryName: categoryName,
+		Value:        value,
+		Time:         pjson.Timestamp{Time: time},
+	}
+}
+
+// AddRecords adds multiple records to Medsenger medical records table for contract. Returns recordIds.
+func (c *Client) AddRecords(contractId int, records []Record) ([]int, error) {
+	type Request struct {
+		api.TokenAndContractRequest
+		Values   []Record `json:"values"`
+		ReturnId bool     `json:"return_id"`
+	}
+	request := Request{
+		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+		Values:                  records,
+		ReturnId:                true,
 	}
 	reqUrl := c.urlAppendingPath("/api/agents/records/add")
 	ids, err := net.MakeRequest[Request, []int](reqUrl, request)
