@@ -18,7 +18,7 @@ type sendMessageOptions struct {
 	OnlyDoctor      bool                `json:"only_doctor"`
 	NeedAnswer      bool                `json:"need_answer"`
 	OnlyPatient     bool                `json:"only_patient"`
-	ActionDeadline  json.Timestamp      `json:"action_deadline,omitempty"`
+	ActionDeadline  *json.Timestamp     `json:"action_deadline,omitempty"`
 	IsUrgent        bool                `json:"is_urgent"`
 	Attachments     []MessageAttachment `json:"attachments,omitempty"`
 }
@@ -109,7 +109,7 @@ func WithSmallAction() SendMessageOption {
 // WithActionDeadline returns a SendMessageOption which sets date when message becomes inactive.
 func WithActionDeadline(t time.Time) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
-		o.ActionDeadline = json.Timestamp{Time: t}
+		o.ActionDeadline = &json.Timestamp{Time: t}
 	})
 }
 
