@@ -3,10 +3,12 @@ package maigo
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 
 	"github.com/TikhonP/maigo/internal/api"
+	"github.com/TikhonP/maigo/internal/assert"
 	pjson "github.com/TikhonP/maigo/internal/json"
 	"github.com/TikhonP/maigo/internal/net"
 )
@@ -16,6 +18,10 @@ import (
 type Client struct {
 	apiKey string // Secret assigned to agent.
 	host   string // Medsenger service target hostname.
+}
+
+func (c *Client) DebugData() string {
+	return fmt.Sprintf("apiKey: %s..., host: %s", c.apiKey[:10], c.host)
 }
 
 // urlAppendingPath generates *url.URL based on Client.host and provided path.
@@ -34,6 +40,7 @@ func (c *Client) tokenAndContractRequest(contractId int) api.TokenAndContractReq
 //
 // Default host is "medsenger.ru". Host can be modified using Client.UpdateHost method.
 func Init(apiKey string) *Client {
+	assert.Assert(len(apiKey) > 10, "apiKey must be at least 10 characters long")
 	return &Client{apiKey: apiKey, host: "medsenger.ru"}
 }
 
@@ -218,3 +225,4 @@ func (c *Client) AddRecords(contractId int, records []Record) ([]int, error) {
 	}
 	return *ids, nil
 }
+
