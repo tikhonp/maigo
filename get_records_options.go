@@ -9,11 +9,11 @@ import (
 
 type getRecordsOptions struct {
 	api.TokenAndContractRequest
-	CategoryName string         `json:"category_name,omitempty"`
-	Limit        int            `json:"limit,omitempty"`
-	Offset       int            `json:"offset,omitempty"`
-	From         json.Timestamp `json:"from,omitempty"`
-	To           json.Timestamp `json:"to,omitempty"`
+	CategoryName string          `json:"category_name,omitempty"`
+	Limit        int             `json:"limit,omitempty"`
+	Offset       int             `json:"offset,omitempty"`
+	From         *json.Timestamp `json:"from,omitempty"`
+	To           *json.Timestamp `json:"to,omitempty"`
 }
 
 func applyGetRecordsOptions(opts *getRecordsOptions, options ...GetRecordsOption) {
@@ -71,14 +71,14 @@ func Offset(offset int) GetRecordsOption {
 // FromTime is an option for GetRecords that specifies the start time of the records to retrieve.
 func FromTime(from time.Time) GetRecordsOption {
 	return newFuncGetRecordsOption(func(o *getRecordsOptions) {
-		o.From = json.Timestamp{Time: from}
+		o.From = &json.Timestamp{Time: from}
 	})
 }
 
 // ToTime is an option for GetRecords that specifies the end time of the records to retrieve.
 func ToTime(to time.Time) GetRecordsOption {
 	return newFuncGetRecordsOption(func(o *getRecordsOptions) {
-		o.To = json.Timestamp{Time: to}
+		o.To = &json.Timestamp{Time: to}
 	})
 }
 
