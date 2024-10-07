@@ -51,3 +51,4 @@ func MakeRequestWithEmptyResponse[Request any](url *url.URL, data Request) error
 	}
 	return nil
 }
+

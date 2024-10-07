@@ -161,3 +161,4 @@ func WithAttachments(a []MessageAttachment) SendMessageOption {
 		o.Attachments = a
 	})
 }
+

@@ -110,10 +110,19 @@ func (c *Client) GetAvailableCategories(contractId int) (*Categories, error) {
 	return net.MakeRequest[api.TokenAndContractRequest, Categories](reqUrl, request)
 }
 
-func (c *Client) GetRecords(contractId int) (*emptyResponse, error) {
-	request := c.tokenAndContractRequest(contractId)
-	reqUrl := c.urlAppendingPath("/api/agents/records/get")
-	return net.MakeRequest[api.TokenAndContractRequest, emptyResponse](reqUrl, request)
+// GetRecords fetches medical records by contractId.
+// By default all recrds sorted ascending by time. So if you need to get latest record you need to set limit to 1.
+func (c *Client) GetRecords(contractId int, opts ...GetRecordsOption) ([]MedicalRecord, error) {
+	request := getRecordsOptions{
+		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+	}
+	applyGetRecordsOptions(&request, opts...)
+	reqUrl := c.urlAppendingPath("/api/agents/records/get/all")
+	records, err := net.MakeRequest[getRecordsOptions, []MedicalRecord](reqUrl, request)
+	if err != nil {
+		return nil, err
+	}
+	return *records, nil
 }
 
 // GetRecord fetches a record by contractId and recordId.
