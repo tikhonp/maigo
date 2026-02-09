@@ -1,3 +1,4 @@
+// Package net provides network request helpers.
 package net
 
 import (
@@ -10,9 +11,9 @@ import (
 
 func MakeRequest[Request any, Response any](url *url.URL, data Request) (*Response, error) {
 	var response *Response
-	encodedData, encodeJsonErr := json.Marshal(data)
-	if encodeJsonErr != nil {
-		return response, encodeJsonErr
+	encodedData, encodeJSONErr := json.Marshal(data)
+	if encodeJSONErr != nil {
+		return response, encodeJSONErr
 	}
 
 	// log.Println("encodedData", string(encodedData))
@@ -33,14 +34,14 @@ func MakeRequest[Request any, Response any](url *url.URL, data Request) (*Respon
 	// }
 	// log.Printf("RESPONSE:\n%s", string(respDump))
 
-	decodeJsonErr := json.NewDecoder(httpResponse.Body).Decode(&response)
-	return response, decodeJsonErr
+	decodeJSONErr := json.NewDecoder(httpResponse.Body).Decode(&response)
+	return response, decodeJSONErr
 }
 
 func MakeRequestWithEmptyResponse[Request any](url *url.URL, data Request) error {
-	encodedData, encodeJsonErr := json.Marshal(data)
-	if encodeJsonErr != nil {
-		return encodeJsonErr
+	encodedData, encodeJSONErr := json.Marshal(data)
+	if encodeJSONErr != nil {
+		return encodeJSONErr
 	}
 	httpResponse, httpErr := http.Post(url.String(), "application/json", bytes.NewBuffer(encodedData))
 	if httpErr != nil {
@@ -51,4 +52,3 @@ func MakeRequestWithEmptyResponse[Request any](url *url.URL, data Request) error
 	}
 	return nil
 }
-

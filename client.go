@@ -1,3 +1,5 @@
+// Package maigo provides Go SDK for Medsenger API:
+// A high performance, open source, SDK for Medsenger AI agents.
 package maigo
 
 import (
@@ -29,10 +31,10 @@ func (c *Client) urlAppendingPath(path string) *url.URL {
 	return &url.URL{Scheme: "https", Host: c.host, Path: path}
 }
 
-func (c *Client) tokenAndContractRequest(contractId int) api.TokenAndContractRequest {
+func (c *Client) tokenAndContractRequest(contractID int) api.TokenAndContractRequest {
 	return api.TokenAndContractRequest{
-		TokenOnlyRequest: api.TokenOnlyRequest{ApiKey: c.apiKey},
-		ContractId:       contractId,
+		TokenOnlyRequest: api.TokenOnlyRequest{APIKey: c.apiKey},
+		ContractID:       contractID,
 	}
 }
 
@@ -50,75 +52,73 @@ func (c *Client) UpdateHost(host string) *Client {
 	return c
 }
 
-type emptyResponse struct{}
-
 // GetContractInfo fetches information about contract with provided contractId.
-func (c *Client) GetContractInfo(contractId int) (*ContractInfo, error) {
-	request := c.tokenAndContractRequest(contractId)
-	reqUrl := c.urlAppendingPath("/api/agents/patient/info")
-	return net.MakeRequest[api.TokenAndContractRequest, ContractInfo](reqUrl, request)
+func (c *Client) GetContractInfo(contractID int) (*ContractInfo, error) {
+	request := c.tokenAndContractRequest(contractID)
+	reqURL := c.urlAppendingPath("/api/agents/patient/info")
+	return net.MakeRequest[api.TokenAndContractRequest, ContractInfo](reqURL, request)
 }
 
 // GetClinicsInfo fetches all clinics.
 func (c *Client) GetClinicsInfo() (*Clinics, error) {
-	request := api.TokenOnlyRequest{ApiKey: c.apiKey}
-	reqUrl := c.urlAppendingPath("/api/agents/clinics")
-	return net.MakeRequest[api.TokenOnlyRequest, Clinics](reqUrl, request)
+	request := api.TokenOnlyRequest{APIKey: c.apiKey}
+	reqURL := c.urlAppendingPath("/api/agents/clinics")
+	return net.MakeRequest[api.TokenOnlyRequest, Clinics](reqURL, request)
 }
 
 // SendMessage sends message in contract chat.
-func (c *Client) SendMessage(contractId int, text string, opts ...SendMessageOption) (msgId int, err error) {
+func (c *Client) SendMessage(contractID int, text string, opts ...SendMessageOption) (msgID int, err error) {
 	type Request struct {
 		api.TokenAndContractRequest
 		Message *sendMessageOptions `json:"message"`
 	}
 	type Response struct {
 		State string `json:"state"`
-		Id    int    `json:"id"`
+		ID    int    `json:"id"`
 	}
 	request := Request{
-		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
 		Message:                 newSendMessageOptions(text, opts...),
 	}
-	reqUrl := c.urlAppendingPath("/api/agents/message")
-	resp, err := net.MakeRequest[Request, Response](reqUrl, request)
-	return resp.Id, err
+	reqURL := c.urlAppendingPath("/api/agents/message")
+	resp, err := net.MakeRequest[Request, Response](reqURL, request)
+	return resp.ID, err
 }
 
 // OutDateMessage hides the message from a chat.
-func (c *Client) OutDateMessage(contractId int, messageId int) error {
+func (c *Client) OutDateMessage(contractID int, messageID int) error {
 	type Request struct {
 		api.TokenAndContractRequest
-		MessageId int `json:"message_id"`
+		MessageID int `json:"message_id"`
 	}
-	request := Request{TokenAndContractRequest: c.tokenAndContractRequest(contractId), MessageId: messageId}
-	reqUrl := c.urlAppendingPath("/api/agents/message/outdate")
-	return net.MakeRequestWithEmptyResponse(reqUrl, request)
+	request := Request{TokenAndContractRequest: c.tokenAndContractRequest(contractID), MessageID: messageID}
+	reqURL := c.urlAppendingPath("/api/agents/message/outdate")
+	return net.MakeRequestWithEmptyResponse(reqURL, request)
 }
 
 // GetCategories fetches all medical records categories.
 func (c *Client) GetCategories() (*Categories, error) {
-	request := api.TokenOnlyRequest{ApiKey: c.apiKey}
-	reqUrl := c.urlAppendingPath("/api/agents/records/categories")
-	return net.MakeRequest[api.TokenOnlyRequest, Categories](reqUrl, request)
+	request := api.TokenOnlyRequest{APIKey: c.apiKey}
+	reqURL := c.urlAppendingPath("/api/agents/records/categories")
+	return net.MakeRequest[api.TokenOnlyRequest, Categories](reqURL, request)
 }
 
 // GetAvailableCategories fetches all available medical records categories.
-func (c *Client) GetAvailableCategories(contractId int) (*Categories, error) {
-	request := c.tokenAndContractRequest(contractId)
-	reqUrl := c.urlAppendingPath("/api/agents/records/available_categories")
-	return net.MakeRequest[api.TokenAndContractRequest, Categories](reqUrl, request)
+func (c *Client) GetAvailableCategories(contractID int) (*Categories, error) {
+	request := c.tokenAndContractRequest(contractID)
+	reqURL := c.urlAppendingPath("/api/agents/records/available_categories")
+	return net.MakeRequest[api.TokenAndContractRequest, Categories](reqURL, request)
 }
 
 // GetRecords fetches medical records by contractId.
 // By default all recrds sorted ascending by time. So if you need to get latest record you need to set limit to 1.
-func (c *Client) GetRecords(contractId int, opts ...GetRecordsOption) ([]MedicalRecord, error) {
+func (c *Client) GetRecords(contractID int, opts ...GetRecordsOption) ([]MedicalRecord, error) {
 	request := getRecordsOptions{
-		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
 	}
 	applyGetRecordsOptions(&request, opts...)
-	reqUrl := c.urlAppendingPath("/api/agents/records/get/all")
-	records, err := net.MakeRequest[getRecordsOptions, []MedicalRecord](reqUrl, request)
+	reqURL := c.urlAppendingPath("/api/agents/records/get/all")
+	records, err := net.MakeRequest[getRecordsOptions, []MedicalRecord](reqURL, request)
 	if err != nil {
 		return nil, err
 	}
@@ -126,72 +126,65 @@ func (c *Client) GetRecords(contractId int, opts ...GetRecordsOption) ([]Medical
 }
 
 // GetRecord fetches a record by contractId and recordId.
-func (c *Client) GetRecord(contractId int, recordId int) (*MedicalRecord, error) {
+func (c *Client) GetRecord(contractID int, recordID int) (*MedicalRecord, error) {
 	type Request struct {
 		api.TokenAndContractRequest
-		RecordId int `json:"record_id"`
+		RecordID int `json:"record_id"`
 	}
 	request := Request{
-		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
-		RecordId:                recordId,
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
+		RecordID:                recordID,
 	}
-	reqUrl := c.urlAppendingPath("/api/agents/records/get")
-	return net.MakeRequest[Request, MedicalRecord](reqUrl, request)
+	reqURL := c.urlAppendingPath("/api/agents/records/get")
+	return net.MakeRequest[Request, MedicalRecord](reqURL, request)
 }
 
-func (c *Client) AddHooksForCategories(contractId int) {
+func (c *Client) AddHooksForCategories(contractID int) {
 	// TODO: implement it
 	panic("not implemented")
 }
 
-func (c *Client) RemoveHooksForCategories(contractId int) {
+func (c *Client) RemoveHooksForCategories(contractID int) {
 	// TODO: implement it
 	panic("not implemented")
 }
 
 // SendRecordAddition commit addition to a record.
-func (c *Client) SendRecordAddition(contractId int, recordId int, note string) error {
+func (c *Client) SendRecordAddition(contractID int, recordID int, note string) error {
 	type Request struct {
 		api.TokenAndContractRequest
-		RecordId int    `json:"record_id"`
+		RecordID int    `json:"record_id"`
 		Note     string `json:"addition"`
 	}
 	request := Request{
-		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
-		RecordId:                recordId,
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
+		RecordID:                recordID,
 		Note:                    note,
 	}
-	reqUrl := c.urlAppendingPath("/api/agents/records/addition")
-	return net.MakeRequestWithEmptyResponse(reqUrl, request)
-}
-
-// GetAgentTokenForContractId fetches agent token for contract.
-func (c *Client) GetAgentTokenForContractId(contractId int) (*AgentToken, error) {
-	request := c.tokenAndContractRequest(contractId)
-	reqUrl := c.urlAppendingPath("/api/agents/token")
-	return net.MakeRequest[api.TokenAndContractRequest, AgentToken](reqUrl, request)
+	reqURL := c.urlAppendingPath("/api/agents/records/addition")
+	return net.MakeRequestWithEmptyResponse(reqURL, request)
 }
 
 // AddRecord adds medical record to Medsenger medical records table for contract. Returns recordId.
-func (c *Client) AddRecord(contractId int, categoryName, value string, recordTime time.Time, params *json.Marshaler) (*int, error) {
+func (c *Client) AddRecord(contractID int, categoryName, value string, recordTime time.Time, params *json.Marshaler) (*int, error) {
 	type Request struct {
 		api.TokenAndContractRequest
 		CategoryName string          `json:"category_name"`
 		Value        string          `json:"value"`
-		ReturnId     bool            `json:"return_id"`
+		ReturnID     bool            `json:"return_id"`
 		Time         pjson.Timestamp `json:"time"`
 		Params       *json.Marshaler `json:"params,omitempty"`
 	}
 	request := Request{
-		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
 		CategoryName:            categoryName,
 		Value:                   value,
-		ReturnId:                true,
+		ReturnID:                true,
 		Time:                    pjson.Timestamp{Time: recordTime},
 		Params:                  params,
 	}
-	reqUrl := c.urlAppendingPath("/api/agents/records/add")
-	ids, err := net.MakeRequest[Request, []int](reqUrl, request)
+	reqURL := c.urlAppendingPath("/api/agents/records/add")
+	ids, err := net.MakeRequest[Request, []int](reqURL, request)
 	if err != nil {
 		return nil, err
 	}
@@ -216,22 +209,21 @@ func NewRecord(categoryName, value string, time time.Time) Record {
 }
 
 // AddRecords adds multiple records to Medsenger medical records table for contract. Returns recordIds.
-func (c *Client) AddRecords(contractId int, records []Record) ([]int, error) {
+func (c *Client) AddRecords(contractID int, records []Record) ([]int, error) {
 	type Request struct {
 		api.TokenAndContractRequest
 		Values   []Record `json:"values"`
-		ReturnId bool     `json:"return_id"`
+		ReturnID bool     `json:"return_id"`
 	}
 	request := Request{
-		TokenAndContractRequest: c.tokenAndContractRequest(contractId),
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
 		Values:                  records,
-		ReturnId:                true,
+		ReturnID:                true,
 	}
-	reqUrl := c.urlAppendingPath("/api/agents/records/add")
-	ids, err := net.MakeRequest[Request, []int](reqUrl, request)
+	reqURL := c.urlAppendingPath("/api/agents/records/add")
+	ids, err := net.MakeRequest[Request, []int](reqURL, request)
 	if err != nil {
 		return nil, err
 	}
 	return *ids, nil
 }
-

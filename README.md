@@ -5,10 +5,6 @@
 
 The __Go__ SDK for __Medsenger API__: A high performance, open source, SDK for Medsenger AI agents.
 
-## 🌂 Prerequisites
-
-- **Go**: any one of the **three latest major** releases.
-
 ## 🛠 Installation
 
 Simply add the following import to your code, and then `go [build|run|test]`

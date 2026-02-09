@@ -1,10 +1,11 @@
+// Package api provides request and response types for Medsenger API.
 package api
 
 type TokenOnlyRequest struct {
-	ApiKey string `json:"api_key"`
+	APIKey string `json:"api_key"`
 }
 
 type TokenAndContractRequest struct {
 	TokenOnlyRequest
-	ContractId int `json:"contract_id"`
+	ContractID int `json:"contract_id"`
 }

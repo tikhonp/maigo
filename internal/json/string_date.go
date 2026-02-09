@@ -1,3 +1,4 @@
+// Package json contains JSON serialization helpers.
 package json
 
 import (

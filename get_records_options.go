@@ -81,4 +81,3 @@ func ToTime(to time.Time) GetRecordsOption {
 		o.To = &json.Timestamp{Time: to}
 	})
 }
-

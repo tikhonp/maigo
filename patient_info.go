@@ -11,15 +11,15 @@ const (
 
 // DoctorHelper describes helper for doctor attached to the contract.
 type DoctorHelper struct {
-	Id     int    `json:"id"`      // DoctorHelper unique identifier.
+	ID     int    `json:"id"`      // DoctorHelper unique identifier.
 	Name   string `json:"name"`    // User name.
 	Role   string `json:"role"`    // Role assigned to helper.
-	UserId int    `json:"user_id"` // Id of the user.
+	UserID int    `json:"user_id"` // Id of the user.
 }
 
 // Scenario describes scenario that connected to a contract.
 type Scenario struct {
-	Id       int    `json:"id"`       // Scenario unique identifier.
+	ID       int    `json:"id"`       // Scenario unique identifier.
 	Name     string `json:"name"`     // Scenario name.
 	Category string `json:"category"` // Scenario category tag.
 
@@ -33,7 +33,7 @@ type Scenario struct {
 type ContractInfo struct {
 
 	// Contract information
-	Id             int            `json:"id"`              // Contract unique identifier.
+	ID             int            `json:"id"`              // Contract unique identifier.
 	ContractNumber string         `json:"contract_number"` // Contract identifier assigned to contract by clinic.
 	Scenario       Scenario       `json:"scenario"`        // Scenario assigned to the contract.
 	StartDate      json.Timestamp `json:"start_timestamp"` // Contract start date.
@@ -53,13 +53,13 @@ type ContractInfo struct {
 	// Doctor information
 	DoctorName           string         `json:"doctor_name"`            // Doctor's name.
 	DoctorPhone          string         `json:"doctor_phone"`           // Doctor's phone.
-	DoctorId             int            `json:"doctor_id"`              // Doctor's unique identifier.
-	DoctorUserId         int            `json:"doctor_user_id"`         // Doctor's user ID.
+	DoctorID             int            `json:"doctor_id"`              // Doctor's unique identifier.
+	DoctorUserID         int            `json:"doctor_user_id"`         // Doctor's user ID.
 	DoctorHelpers        []DoctorHelper `json:"doctor_helpers"`         // Helpers for doctors assigned to an contract.
 	DoctorTimezoneOffset int            `json:"doctor_timezone_offset"` // Doctor's timezone offset.
 
 	// Clinic information
-	ClinicId       int    `json:"clinic_id"`   // Clinic's unique identifier.
+	ClinicID       int    `json:"clinic_id"`   // Clinic's unique identifier.
 	ClinicName     string `json:"clinic_name"` // Clinic's name.
 	ClinicTimezone string `json:"timezone"`    // Clinic's timezone.
 

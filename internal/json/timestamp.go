@@ -24,4 +24,3 @@ func (t *Timestamp) UnmarshalJSON(data []byte) error {
 	t.Time = time.Unix(0, int64(f*float64(time.Second/time.Nanosecond)))
 	return nil
 }
-

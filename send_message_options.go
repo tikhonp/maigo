@@ -53,8 +53,8 @@ type MessageActionType string
 
 const (
 	Action    MessageActionType = "action"  // Open action in iFrame ot WebView.
-	UrlAction MessageActionType = "url"     // Open action as outside url.
-	AppUrl    MessageActionType = "app_url" // Open action as outside url that shows only in mobile app.
+	URLAction MessageActionType = "url"     // Open action as outside url.
+	AppURL    MessageActionType = "app_url" // Open action as outside url that shows only in mobile app.
 )
 
 type MessageAttachment struct {
@@ -161,4 +161,3 @@ func WithAttachments(a []MessageAttachment) SendMessageOption {
 		o.Attachments = a
 	})
 }
-

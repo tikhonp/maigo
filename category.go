@@ -1,7 +1,7 @@
 package maigo
 
 type Category struct {
-	Id                    int    `json:"id"`          // Category unique identifier.
+	ID                    int    `json:"id"`          // Category unique identifier.
 	Name                  string `json:"name"`        // Category name.
 	Description           string `json:"description"` // Category name.
 	Unit                  string `json:"unit"`
