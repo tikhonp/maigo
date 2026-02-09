@@ -3,8 +3,8 @@ package maigo
 import (
 	"time"
 
-	"github.com/TikhonP/maigo/internal/api"
-	"github.com/TikhonP/maigo/internal/json"
+	"github.com/tikhonp/maigo/internal/api"
+	"github.com/tikhonp/maigo/internal/json"
 )
 
 type getRecordsOptions struct {

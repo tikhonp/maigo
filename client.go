@@ -9,10 +9,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/TikhonP/maigo/internal/api"
-	"github.com/TikhonP/maigo/internal/assert"
-	pjson "github.com/TikhonP/maigo/internal/json"
-	"github.com/TikhonP/maigo/internal/net"
+	"github.com/tikhonp/maigo/internal/api"
+	"github.com/tikhonp/maigo/internal/assert"
+	pjson "github.com/tikhonp/maigo/internal/json"
+	"github.com/tikhonp/maigo/internal/net"
 )
 
 // Client encapsulates a range of functionality related to

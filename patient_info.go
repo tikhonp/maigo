@@ -1,6 +1,6 @@
 package maigo
 
-import "github.com/TikhonP/maigo/internal/json"
+import "github.com/tikhonp/maigo/internal/json"
 
 type Sex string
 

@@ -11,7 +11,7 @@ Simply add the following import to your code, and then `go [build|run|test]`
 will automatically fetch the necessary dependencies:
 
 ```go
-import "github.com/TikhonP/maigo"
+import "github.com/tikhonp/maigo"
 ```
 
 ## 💼 License

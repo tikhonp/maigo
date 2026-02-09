@@ -3,7 +3,7 @@ package maigo
 import (
 	"time"
 
-	"github.com/TikhonP/maigo/internal/json"
+	"github.com/tikhonp/maigo/internal/json"
 )
 
 type sendMessageOptions struct {
