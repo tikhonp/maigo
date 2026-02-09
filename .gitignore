@@ -23,4 +23,4 @@ go.work
 *.DS_Store
 *.swp
 .idea/
-cmd/main.go
+cmd/*/main.go

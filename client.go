@@ -227,3 +227,8 @@ func (c *Client) AddRecords(contractID int, records []Record) ([]int, error) {
 	}
 	return *ids, nil
 }
+
+// DecodeAgentJWT decodes JWT token issued for agent and returns its claims.
+func (c *Client) DecodeAgentJWT(tokenString string) (*JWTClaims, error) {
+	return decodeAgentJWT(tokenString, c.apiKey)
+}
