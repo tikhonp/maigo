@@ -22,9 +22,9 @@ type JWTClaims struct {
 	jwt.RegisteredClaims
 
 	// ContractID may be null for system requests, so we use a pointer to string to allow nil values.
-	ContractID *string `json:"contract_id,omitempty"`
+	ContractID *int `json:"contract_id,omitempty"`
 	// AgentID is the ID of your agent.
-	AgentID string `json:"agent_id"`
+	AgentID int `json:"agent_id"`
 	// Roles can be system, patient, doctor, registrator, supervisor.
 	Roles []RequestRole `json:"roles"`
 	// Type is the type of token, e.g., "agent_access".
