@@ -14,6 +14,7 @@ type getRecordsOptions struct {
 	Offset       int             `json:"offset,omitempty"`
 	From         *json.Timestamp `json:"from,omitempty"`
 	To           *json.Timestamp `json:"to,omitempty"`
+	SameGroup    bool            `json:"same_group,omitempty"`
 }
 
 func applyGetRecordsOptions(opts *getRecordsOptions, options ...GetRecordsOption) {
@@ -79,5 +80,13 @@ func FromTime(from time.Time) GetRecordsOption {
 func ToTime(to time.Time) GetRecordsOption {
 	return newFuncGetRecordsOption(func(o *getRecordsOptions) {
 		o.To = &json.Timestamp{Time: to}
+	})
+}
+
+// WithGroup is an option for GetRecords that returns only one record per group
+// (records sharing the same group are collapsed).
+func WithGroup() GetRecordsOption {
+	return newFuncGetRecordsOption(func(o *getRecordsOptions) {
+		o.SameGroup = true
 	})
 }

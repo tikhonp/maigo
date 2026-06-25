@@ -3,7 +3,6 @@
 package maigo
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/url"
@@ -139,14 +138,32 @@ func (c *Client) GetRecord(contractID int, recordID int) (*MedicalRecord, error)
 	return net.MakeRequest[Request, MedicalRecord](reqURL, request)
 }
 
-func (c *Client) AddHooksForCategories(contractID int) {
-	// TODO: implement it
-	panic("not implemented")
+// DeleteRecord deletes a medical record from a contract.
+func (c *Client) DeleteRecord(contractID int, recordID int) error {
+	type Request struct {
+		api.TokenAndContractRequest
+		RecordID int `json:"record_id"`
+	}
+	request := Request{
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
+		RecordID:                recordID,
+	}
+	reqURL := c.urlAppendingPath("/api/agents/records/delete")
+	return net.MakeRequestWithEmptyResponse(reqURL, request)
 }
 
-func (c *Client) RemoveHooksForCategories(contractID int) {
-	// TODO: implement it
-	panic("not implemented")
+// SetClassifier sets the record classifier code for a contract.
+func (c *Client) SetClassifier(contractID int, code string) error {
+	type Request struct {
+		api.TokenAndContractRequest
+		Code string `json:"code"`
+	}
+	request := Request{
+		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
+		Code:                    code,
+	}
+	reqURL := c.urlAppendingPath("/api/agents/classifier")
+	return net.MakeRequestWithEmptyResponse(reqURL, request)
 }
 
 // SendRecordAddition commit addition to a record.
@@ -165,46 +182,48 @@ func (c *Client) SendRecordAddition(contractID int, recordID int, note string) e
 	return net.MakeRequestWithEmptyResponse(reqURL, request)
 }
 
-// AddRecord adds medical record to Medsenger medical records table for contract. Returns recordId.
-func (c *Client) AddRecord(contractID int, categoryName, value string, recordTime time.Time, params *json.Marshaler) (*int, error) {
+// AddRecord adds a medical record to the Medsenger records table for a contract
+// and returns the new record id.
+func (c *Client) AddRecord(contractID int, categoryName string, value any, opts ...AddRecordOption) (int, error) {
 	type Request struct {
 		api.TokenAndContractRequest
-		CategoryName string          `json:"category_name"`
-		Value        string          `json:"value"`
-		ReturnID     bool            `json:"return_id"`
-		Time         pjson.Timestamp `json:"time"`
-		Params       *json.Marshaler `json:"params,omitempty"`
+		CategoryName string `json:"category_name"`
+		Value        any    `json:"value"`
+		ReturnID     bool   `json:"return_id"`
+		addRecordOptions
 	}
 	request := Request{
 		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
 		CategoryName:            categoryName,
 		Value:                   value,
 		ReturnID:                true,
-		Time:                    pjson.Timestamp{Time: recordTime},
-		Params:                  params,
+		addRecordOptions:        newAddRecordOptions(opts...),
 	}
 	reqURL := c.urlAppendingPath("/api/agents/records/add")
 	ids, err := net.MakeRequest[Request, []int](reqURL, request)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
 	if len(*ids) == 0 {
-		return nil, errors.New("empty id response")
+		return 0, errors.New("empty id response")
 	}
-	return &(*ids)[0], nil
+	return (*ids)[0], nil
 }
 
 type Record struct {
-	CategoryName string          `json:"category_name"`
-	Value        string          `json:"value"`
-	Time         pjson.Timestamp `json:"time"`
+	CategoryName string           `json:"category_name"`
+	Value        any              `json:"value"`
+	Time         *pjson.Timestamp `json:"time,omitempty"`
+	Params       map[string]any   `json:"params,omitempty"`
+	Files        []Attachment     `json:"files,omitempty"`
+	Replace      bool             `json:"replace"`
 }
 
-func NewRecord(categoryName, value string, time time.Time) Record {
+func NewRecord(categoryName string, value any, recordTime time.Time) Record {
 	return Record{
 		CategoryName: categoryName,
 		Value:        value,
-		Time:         pjson.Timestamp{Time: time},
+		Time:         &pjson.Timestamp{Time: recordTime},
 	}
 }
 
@@ -231,4 +250,11 @@ func (c *Client) AddRecords(contractID int, records []Record) ([]int, error) {
 // DecodeAgentJWT decodes JWT token issued for agent and returns its claims.
 func (c *Client) DecodeAgentJWT(tokenString string) (*JWTClaims, error) {
 	return decodeAgentJWT(tokenString, c.apiKey)
+}
+
+// ValidateAgentJWT decodes the token and verifies it is an "agent_access" token
+// with at least one role, returning its claims. It returns ErrWrongTokenType or
+// ErrNoRoles when those checks fail.
+func (c *Client) ValidateAgentJWT(tokenString string) (*JWTClaims, error) {
+	return validateAgentJWT(tokenString, c.apiKey)
 }

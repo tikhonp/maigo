@@ -1,6 +1,16 @@
 package maigo
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"errors"
+
+	"github.com/golang-jwt/jwt/v5"
+)
+
+// Errors returned by Client.ValidateAgentJWT.
+var (
+	ErrWrongTokenType = errors.New("maigo: wrong token type")
+	ErrNoRoles        = errors.New("maigo: no roles in token")
+)
 
 // RequestRole defines the role of the backand making the request to the agent.
 type RequestRole string
@@ -48,4 +58,21 @@ func decodeAgentJWT(tokenString, apiKey string) (*JWTClaims, error) {
 	} else {
 		return nil, jwt.ErrTokenInvalidClaims
 	}
+}
+
+// validateAgentJWT decodes the token and additionally checks that it is an
+// "agent_access" token carrying at least one role, mirroring the Python SDK's
+// validate_agent_token helper.
+func validateAgentJWT(tokenString, apiKey string) (*JWTClaims, error) {
+	claims, err := decodeAgentJWT(tokenString, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	if claims.Type != "agent_access" {
+		return nil, ErrWrongTokenType
+	}
+	if len(claims.Roles) == 0 {
+		return nil, ErrNoRoles
+	}
+	return claims, nil
 }

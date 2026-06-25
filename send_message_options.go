@@ -7,20 +7,20 @@ import (
 )
 
 type sendMessageOptions struct {
-	Text            string              `json:"text"`
-	ForwardToDoctor bool                `json:"forward_to_doctor"`
-	ActionLink      string              `json:"action_link,omitempty"`
-	SendFrom        UserRole            `json:"send_from,omitempty"`
-	ActionName      string              `json:"action_name,omitempty"`
-	ActionOneTime   bool                `json:"action_onetime"`
-	ActionBig       bool                `json:"action_big"`
-	ActionType      MessageActionType   `json:"action_type"`
-	OnlyDoctor      bool                `json:"only_doctor"`
-	NeedAnswer      bool                `json:"need_answer"`
-	OnlyPatient     bool                `json:"only_patient"`
-	ActionDeadline  *json.Timestamp     `json:"action_deadline,omitempty"`
-	IsUrgent        bool                `json:"is_urgent"`
-	Attachments     []MessageAttachment `json:"attachments,omitempty"`
+	Text            string            `json:"text"`
+	ForwardToDoctor bool              `json:"forward_to_doctor"`
+	ActionLink      string            `json:"action_link,omitempty"`
+	SendFrom        UserRole          `json:"send_from,omitempty"`
+	ActionName      string            `json:"action_name,omitempty"`
+	ActionOneTime   bool              `json:"action_onetime"`
+	ActionBig       bool              `json:"action_big"`
+	ActionType      MessageActionType `json:"action_type"`
+	OnlyDoctor      bool              `json:"only_doctor"`
+	NeedAnswer      bool              `json:"need_answer"`
+	OnlyPatient     bool              `json:"only_patient"`
+	ActionDeadline  *json.Timestamp   `json:"action_deadline,omitempty"`
+	IsUrgent        bool              `json:"is_urgent"`
+	Attachments     []Attachment      `json:"attachments,omitempty"`
 }
 
 func newSendMessageOptions(text string, opts ...SendMessageOption) *sendMessageOptions {
@@ -56,9 +56,6 @@ const (
 	URLAction MessageActionType = "url"     // Open action as outside url.
 	AppURL    MessageActionType = "app_url" // Open action as outside url that shows only in mobile app.
 )
-
-type MessageAttachment struct {
-}
 
 type SendMessageOption interface {
 	apply(*sendMessageOptions)
@@ -156,7 +153,7 @@ func WithPatientSenderRole() SendMessageOption {
 }
 
 // WithAttachments returns a SendMessageOption which sets attachments to a message.
-func WithAttachments(a []MessageAttachment) SendMessageOption {
+func WithAttachments(a []Attachment) SendMessageOption {
 	return newFuncSendMessageOption(func(o *sendMessageOptions) {
 		o.Attachments = a
 	})

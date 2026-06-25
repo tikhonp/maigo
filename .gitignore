@@ -24,3 +24,5 @@ go.work
 *.swp
 .idea/
 cmd/*/main.go
+
+CLAUDE.md
