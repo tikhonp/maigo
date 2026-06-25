@@ -1,0 +1,92 @@
+syntax = "proto3";
+
+package records;
+
+option go_package = "github.com/tikhonp/maigo/internal/grpc/recordspb;recordspb";
+
+service Records{
+  rpc GetCategoryList(Empty) returns (CategoryList) {}
+  rpc GetCategoryListForUser(User) returns (CategoryList) {}
+  rpc GetRecordById(RecordRequest) returns (Record) {}
+  rpc GetLastGroupForUser(User) returns (RecordList) {}
+  rpc GetRecords(RecordQuery) returns (RecordList) {}
+  rpc CountRecords(RecordQuery) returns (RecordList) {}
+  rpc GetMultipleRecords(MultiRecordQuery) returns (MultiRecordAnswer) {}
+}
+
+message Empty {
+
+}
+
+message User {
+  int32 id = 1;
+}
+
+message RecordRequest {
+  int64 id = 1;
+}
+
+message CategoryList {
+  repeated Category categories = 1;
+}
+
+message Category {
+  int64 id = 1;
+  string name = 2;
+  optional string description = 3;
+  optional string unit = 4;
+  optional string type = 5;
+  optional string default_representation = 6;
+  optional bool is_legacy = 7;
+  optional string subcategory = 8;
+  optional bool doctor_can_add = 9;
+  optional bool doctor_can_replace = 10;
+}
+
+message RecordList {
+  repeated Record records = 1;
+  int32 count = 2;
+}
+
+message RecordSource {
+  optional int32 id = 1;
+  string name = 2;
+}
+
+message RecordFile {
+  int32 id = 1;
+  string name = 2;
+  string type = 3;
+}
+
+message Record {
+  int64 id = 1;
+  string value = 2;
+  int64 category_id = 3;
+  int32 user_id = 4;
+  int64 created_at = 5;
+  int64 updated_at = 6;
+  string params = 7;
+  string additions = 8;
+  string group = 9;
+  optional RecordSource source = 10;
+  repeated RecordFile attached_files = 11;
+}
+
+message RecordQuery {
+  repeated int64 category_ids = 1;
+  optional int64 from_timestamp = 2;
+  optional int64 to_timestamp = 3;
+  optional int64 offset = 4;
+  optional int64 limit = 5;
+  int32 user_id = 6;
+  bool with_group = 7;
+}
+
+message MultiRecordQuery {
+  repeated RecordQuery queries = 1;
+}
+
+message MultiRecordAnswer {
+  repeated RecordList answers = 1;
+}

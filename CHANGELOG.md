@@ -94,14 +94,27 @@ err := client.RemoveHooks(contractID, []string{"systolic_pressure"})
 - **Admin:** `NotifyAdmin`, `GetAdminClinicInfo`.
 - **Auth:** `ValidateAgentJWT` plus the `ErrWrongTokenType` and `ErrNoRoles`
   sentinel errors.
+- **gRPC transport (opt-in):** `Init` now accepts options; pass `WithGRPC(host)`
+  to route `GetRecords`, `GetRecord`, `GetCategories`, and
+  `GetAvailableCategories` through gRPC with automatic REST fallback. Adds
+  `GetMultipleRecords` (batched reads), `CountRecords`, and `Client.Close`.
+  Connections use the embedded Medsenger CA and are established lazily;
+  `contract_id` is resolved to the gRPC `user_id` and cached. Generated protobuf
+  code lives in `internal/grpc/recordspb`.
+- `MedicalRecord` gained `Group`, `Params`, `AttachedFiles`, `Time`, and
+  `Uploaded` fields (additive; `Time`/`Uploaded` are populated only via gRPC),
+  plus the `MedicalRecordFile` type.
+
+### Dependencies
+
+- Added `google.golang.org/grpc` and `google.golang.org/protobuf` (for the gRPC
+  transport). The `go` directive was raised to 1.26 by `go mod tidy`.
 
 ### Not included
 
-These parts of the Python client were intentionally left out — REST is the
-canonical transport, so they are optimizations rather than API surface:
+These parts of the Python client were intentionally left out:
 
-- gRPC transport (`grpc_client.py`, `protocol/`, `certificates.py`).
-- Locale tagging/filtering and the in-memory category/user caches.
+- Locale tagging/filtering of categories.
 - Debug logging and Sentry integration.
 
 [1.0.0]: https://github.com/tikhonp/maigo/releases/tag/v1.0.0

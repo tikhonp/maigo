@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/tikhonp/maigo/internal/api"
@@ -19,6 +20,12 @@ import (
 type Client struct {
 	apiKey string // Secret assigned to agent.
 	host   string // Medsenger service target hostname.
+
+	grpcHost string      // gRPC endpoint; empty disables gRPC.
+	grpc     *grpcClient // Lazily-connected gRPC client (nil when disabled).
+
+	userMu    sync.Mutex  // Guards userCache.
+	userCache map[int]int // contractID -> gRPC user_id.
 }
 
 func (c *Client) DebugData() string {
@@ -40,9 +47,18 @@ func (c *Client) tokenAndContractRequest(contractID int) api.TokenAndContractReq
 // Init creates Medsenger AI Client with provided apiKey.
 //
 // Default host is "medsenger.ru". Host can be modified using Client.UpdateHost method.
-func Init(apiKey string) *Client {
+// Pass WithGRPC to enable the gRPC transport (with REST fallback) for record and
+// category reads.
+func Init(apiKey string, opts ...InitOption) *Client {
 	assert.Assert(len(apiKey) > 10, "apiKey must be at least 10 characters long")
-	return &Client{apiKey: apiKey, host: "medsenger.ru"}
+	c := &Client{apiKey: apiKey, host: "medsenger.ru"}
+	for _, opt := range opts {
+		opt.apply(c)
+	}
+	if c.grpcHost != "" {
+		c.grpc = newGRPCClient(apiKey, c.grpcHost)
+	}
+	return c
 }
 
 // UpdateHost modifies host for all Client requests.
@@ -97,6 +113,12 @@ func (c *Client) OutDateMessage(contractID int, messageID int) error {
 
 // GetCategories fetches all medical records categories.
 func (c *Client) GetCategories() (*Categories, error) {
+	if c.grpc != nil {
+		if cats, err := c.grpc.getCategories(); err == nil {
+			result := Categories(cats)
+			return &result, nil
+		}
+	}
 	request := api.TokenOnlyRequest{APIKey: c.apiKey}
 	reqURL := c.urlAppendingPath("/api/agents/records/categories")
 	return net.MakeRequest[api.TokenOnlyRequest, Categories](reqURL, request)
@@ -104,6 +126,14 @@ func (c *Client) GetCategories() (*Categories, error) {
 
 // GetAvailableCategories fetches all available medical records categories.
 func (c *Client) GetAvailableCategories(contractID int) (*Categories, error) {
+	if c.grpc != nil {
+		if uid, err := c.resolveUserID(contractID); err == nil {
+			if cats, err := c.grpc.getCategoriesForUser(uid); err == nil {
+				result := Categories(cats)
+				return &result, nil
+			}
+		}
+	}
 	request := c.tokenAndContractRequest(contractID)
 	reqURL := c.urlAppendingPath("/api/agents/records/available_categories")
 	return net.MakeRequest[api.TokenAndContractRequest, Categories](reqURL, request)
@@ -116,6 +146,11 @@ func (c *Client) GetRecords(contractID int, opts ...GetRecordsOption) ([]Medical
 		TokenAndContractRequest: c.tokenAndContractRequest(contractID),
 	}
 	applyGetRecordsOptions(&request, opts...)
+	if c.grpc != nil {
+		if records, err := c.grpcGetRecords(contractID, &request); err == nil {
+			return records, nil
+		}
+	}
 	reqURL := c.urlAppendingPath("/api/agents/records/get/all")
 	records, err := net.MakeRequest[getRecordsOptions, []MedicalRecord](reqURL, request)
 	if err != nil {
@@ -126,6 +161,15 @@ func (c *Client) GetRecords(contractID int, opts ...GetRecordsOption) ([]Medical
 
 // GetRecord fetches a record by contractId and recordId.
 func (c *Client) GetRecord(contractID int, recordID int) (*MedicalRecord, error) {
+	if c.grpc != nil {
+		rec, err := c.grpc.getRecordByID(recordID)
+		if err == nil {
+			return rec, nil
+		}
+		if errors.Is(err, errGRPCNotFound) {
+			return nil, nil
+		}
+	}
 	type Request struct {
 		api.TokenAndContractRequest
 		RecordID int `json:"record_id"`
